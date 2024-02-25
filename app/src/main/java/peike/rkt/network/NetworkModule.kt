@@ -28,8 +28,6 @@ class NetworkModule {
   @Provides
   @Singleton
   fun providesRetrofit(okHttpClient: OkHttpClient): Retrofit {
-    // TODO: Implement Retrofit
-
     return Retrofit.Builder()
       .baseUrl("https://www.giantbomb.com/api/")
       .client(okHttpClient)
