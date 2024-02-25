@@ -1,25 +1,31 @@
 package peike.rkt.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ContentScale.Companion
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import peike.rkt.home.HomeUiState.SearchResultItem
+import coil.compose.SubcomposeAsyncImage
+import peike.rkt.home.SearchUiState.SearchResultItem
 
 @Composable
 fun DetailScreen(
@@ -27,11 +33,19 @@ fun DetailScreen(
   modifier: Modifier = Modifier,
   onBackPress: () -> Unit
 ) {
+
+  val configuration = LocalConfiguration.current
+
+  val screenWidth = configuration.screenWidthDp.dp
+
+  val imageWidth = screenWidth / 2
+
   BackHandler {
     onBackPress()
   }
   Card(
     modifier = modifier
+      .padding(top = 16.dp)
       .fillMaxSize()
   ) {
     IconButton(onClick = onBackPress) {
@@ -40,8 +54,30 @@ fun DetailScreen(
         contentDescription = null
       )
     }
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp)
+    ) {
+      SubcomposeAsyncImage(
+        model = item.imageUrl,
+        loading = {
+          Box(
+            modifier = Modifier
+              .heightIn(max = imageWidth)
+              .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+          ) {
 
+            CircularProgressIndicator()
+          }
+        },
+        modifier = Modifier
+          .width(imageWidth)
+          .align(Alignment.CenterHorizontally),
+        contentDescription = null
+      )
+      Spacer(modifier = Modifier.height(16.dp))
       TitleRow(item = item)
       DescriptionView(item = item)
     }
@@ -53,20 +89,16 @@ fun TitleRow(
   item: SearchResultItem,
   modifier: Modifier = Modifier
 ) {
-  Row(modifier = modifier) {
-    Text(
-      text = item.name,
-      style = MaterialTheme.typography.headlineSmall,
-      modifier = Modifier.weight(.6f)
-    )
 
-    AsyncImage(
-      model = item.imageUrl,
-      modifier = Modifier.weight(.4f),
-      contentScale = ContentScale.FillWidth,
-      contentDescription = null
-    )
-  }
+  val title = item.releaseDate?.let { releaseDate ->
+    "${item.name} ($releaseDate)"
+  } ?: item.name
+
+  Text(
+    text = title,
+    modifier = modifier,
+    style = MaterialTheme.typography.headlineSmall
+  )
 }
 
 @Composable
@@ -89,7 +121,8 @@ private fun PreviewDetailScreen() {
       description = "Description",
       imageUrl = "https://www.giantbomb.com/a/uploads/screen_kubrick/17/171291/2670675-temp-packshot-v2.jpg",
       thumbnailImageUrl = "https://www.giantbomb.com/a/uploads/screen_kubrick/17/171291/2670675-temp-packshot-v2.jpg",
-      guid = "guid"
+      guid = "guid",
+      releaseDate = "2021-10-08"
     ),
     onBackPress = {}
   )

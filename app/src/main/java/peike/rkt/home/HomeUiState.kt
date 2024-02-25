@@ -1,18 +1,17 @@
 package peike.rkt.home
 
-sealed interface HomeUiState {
-  val searchHistory: List<String>
+data class SearchUiState(
+  val searchBarUiState: SearchBarUiState,
+  val searchResultUiState: SearchResultUiState
+) {
+  data class SearchBarUiState(val recentSearches: List<String>)
 
-  data class Loading(override val searchHistory: List<String>) : HomeUiState
-  data class Content(
-    override val searchHistory: List<String>,
-    val results: List<SearchResultItem>
-  ) : HomeUiState
-
-  data class Error(
-    override val searchHistory: List<String>,
-    val error: String
-  ) : HomeUiState
+  sealed interface SearchResultUiState {
+    data object Loading : SearchResultUiState
+    data object Initial : SearchResultUiState
+    data object Error : SearchResultUiState
+    data class Content(val results: List<SearchResultItem>) : SearchResultUiState
+  }
 
   data class SearchResultItem(
     val guid: String,
@@ -20,5 +19,6 @@ sealed interface HomeUiState {
     val imageUrl: String,
     val thumbnailImageUrl: String,
     val description: String,
+    val releaseDate: String?,
   )
 }

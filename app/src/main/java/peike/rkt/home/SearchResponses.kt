@@ -1,6 +1,5 @@
 package peike.rkt.home
 
-
 data class SearchResponses(
   val error: String,
   val limit: Int,
@@ -16,7 +15,7 @@ data class Game(
   val api_detail_url: String,
   val date_added: String,
   val date_last_updated: String,
-  val deck: String,
+  val deck: String?,
   val description: String,
   val expected_release_day: Any?,
   val expected_release_month: Any?,
@@ -29,7 +28,7 @@ data class Game(
   val name: String,
   val number_of_user_reviews: Int,
   val original_game_rating: List<OriginalGameRating>,
-  val original_release_date: String,
+  val original_release_date: String?,
   val platforms: List<Platform>,
   val site_detail_url: String
 )

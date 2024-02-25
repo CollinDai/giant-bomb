@@ -88,14 +88,15 @@ fun TestAnimatedVisibility(modifier: Modifier = Modifier) {
       }
     ) {
       // Content that needs to appear/disappear goes here:
-      Text("Content to appear/disappear",
+      Text(
+        "Content to appear/disappear",
         Modifier
           .fillMaxWidth()
-          .requiredHeight(200.dp))
+          .requiredHeight(200.dp)
+      )
     }
     Text(text = "Click me to toggle visibility", modifier.clickable { visible = !visible })
   }
-
 }
 
 @Preview
