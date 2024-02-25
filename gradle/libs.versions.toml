@@ -1,6 +1,7 @@
 [versions]
 agp = "8.4.0-alpha11"
 kotlin = "1.9.22"
+kotlinCoroutines = "1.8.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -36,6 +37,10 @@ okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-i
 secret-gradle-plugin = { group = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", name = "secrets-gradle-plugin", version = "2.0.1" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version = "2.6.0" }
 
+truth = { group = "com.google.truth", name = "truth", version = "1.1.5" }
+mockk = { group = "io.mockk", name = "mockk", version = "1.12.0" }
+kotlintx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinCoroutines" }
+turbine = { group = "app.cash.turbine", name = "turbine", version = "1.0.0" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

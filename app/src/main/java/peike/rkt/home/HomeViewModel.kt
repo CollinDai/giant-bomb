@@ -36,9 +36,7 @@ class HomeViewModel @Inject constructor(
       try {
         _uiState.update { it.copy(searchResultUiState = SearchResultUiState.Loading) }
         val trimmedQuery = query.trim()
-        Log.d("HomeViewModel", "Query length: ${trimmedQuery.length}")
         val result = searchRepository.search(trimmedQuery)
-        Log.d("HomeViewModel", "Result: $result")
         val items = result.results.map {
           SearchResultItem(
             guid = it.guid,
@@ -49,7 +47,7 @@ class HomeViewModel @Inject constructor(
             releaseDate = it.original_release_date
           )
         }.sortedBy { it.releaseDate }.asReversed()
-        val updatedSearchHistory = searchRepository.setSearchHistory(query).toList()
+        val updatedSearchHistory = searchRepository.setSearchHistory(trimmedQuery).toList()
         _uiState.update {
           it.copy(
             searchBarUiState = it.searchBarUiState.copy(recentSearches = updatedSearchHistory),
