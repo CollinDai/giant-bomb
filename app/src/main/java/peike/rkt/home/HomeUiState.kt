@@ -4,13 +4,20 @@ data class SearchUiState(
   val searchBarUiState: SearchBarUiState,
   val searchResultUiState: SearchResultUiState
 ) {
-  data class SearchBarUiState(val recentSearches: List<String>)
+  data class SearchBarUiState(
+    val recentSearches: List<String>
+  )
 
   sealed interface SearchResultUiState {
     data object Loading : SearchResultUiState
     data object Initial : SearchResultUiState
     data object Error : SearchResultUiState
     data class Content(val results: List<SearchResultItem>) : SearchResultUiState
+  }
+
+  sealed interface FastSearchUiState {
+    data object Loading : FastSearchUiState
+    data class Content(val results: List<SearchResultItem>) : FastSearchUiState
   }
 
   data class SearchResultItem(

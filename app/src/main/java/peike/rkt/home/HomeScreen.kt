@@ -26,6 +26,7 @@ fun HomeScreen(
     uiState = uiState,
     modifier = modifier,
     onSearch = viewModel::search,
+    onFastSearch = viewModel::fastSearch,
     onSelect = {
       selectedItem = it
       showDetail = true

@@ -9,8 +9,8 @@ class SearchRepository @Inject constructor(
   private val searchService: SearchService,
   private val sharedPreferences: SharedPreferences
 ) {
-  suspend fun search(query: String): SearchResponses {
-    val result = searchService.searchGames(query)
+  suspend fun search(query: String, limit: Int = SEARCH_LIMIT): SearchResponses {
+    val result = searchService.searchGames(query, limit.toString())
     return if (result.isSuccessful) {
       result.body() ?: throw Exception("No results")
     } else {
@@ -35,5 +35,6 @@ class SearchRepository @Inject constructor(
 
   companion object {
     private const val SEARCH_HISTORY_KEY = "search_history"
+    private const val SEARCH_LIMIT = 25
   }
 }

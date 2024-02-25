@@ -27,10 +27,12 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -44,7 +46,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.transformLatest
 import peike.rkt.R
+import peike.rkt.home.SearchUiState.FastSearchUiState
 import peike.rkt.home.SearchUiState.SearchBarUiState
 import peike.rkt.home.SearchUiState.SearchResultItem
 import peike.rkt.home.SearchUiState.SearchResultUiState
@@ -59,12 +67,15 @@ fun SearchScreen(
   uiState: SearchUiState,
   modifier: Modifier = Modifier,
   onSearch: (String) -> Unit,
-  onSelect: (SearchResultItem) -> Unit
+  onSelect: (SearchResultItem) -> Unit,
+  onFastSearch: suspend (String) -> FastSearchUiState
 ) {
   Column(modifier = modifier.fillMaxSize()) {
     TopSearchBar(
       searchBarUiState = uiState.searchBarUiState,
+      onSelect = onSelect,
       onSearch = onSearch,
+      onFastSearch = onFastSearch
     )
     SearchResultView(
       uiState = uiState.searchResultUiState,
@@ -74,15 +85,31 @@ fun SearchScreen(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class, ExperimentalCoroutinesApi::class)
 @Composable
 private fun TopSearchBar(
   searchBarUiState: SearchBarUiState,
   modifier: Modifier = Modifier,
-  onSearch: (String) -> Unit
+  onSearch: (String) -> Unit,
+  onSelect: (SearchResultItem) -> Unit,
+  onFastSearch: suspend (String) -> FastSearchUiState
 ) {
   var text by rememberSaveable { mutableStateOf("") }
   var active by rememberSaveable { mutableStateOf(false) }
+  var fastSearchUiState by rememberSaveable { mutableStateOf<FastSearchUiState?>(null) }
+
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { text }
+      .debounce(500L)
+      .filter { it.length > 2 }
+      .transformLatest {
+        emit(FastSearchUiState.Loading)
+        emit(onFastSearch(it))
+      }
+      .collect {
+        fastSearchUiState = it
+      }
+  }
 
   Box(
     modifier = modifier
@@ -116,13 +143,52 @@ private fun TopSearchBar(
         }
       },
       content = {
-        RecentSearch(searchBarUiState.recentSearches) {
+        fastSearchUiState?.let {
+          FastSearchResult(
+            fastSearchUiState = it,
+            onSelect = { item ->
+              active = false
+              text = item.name
+              onSelect(item)
+            }
+          )
+        } ?: RecentSearch(searchBarUiState.recentSearches) {
           text = it
           active = false
           onSearch(it)
         }
       }
     )
+  }
+}
+
+@Composable
+private fun FastSearchResult(
+  fastSearchUiState: FastSearchUiState,
+  modifier: Modifier = Modifier,
+  onSelect: (SearchResultItem) -> Unit
+) {
+  when (fastSearchUiState) {
+    is FastSearchUiState.Loading -> LoadingView(modifier)
+
+    is FastSearchUiState.Content -> {
+      LazyColumn(
+        modifier = modifier
+          .fillMaxWidth()
+          .padding(16.dp)
+      ) {
+        items(fastSearchUiState.results) { resultItem ->
+          ListItem(
+            headlineContent = {
+              Text(resultItem.name)
+            },
+            modifier = Modifier
+              .fillMaxWidth()
+              .clickable { onSelect(resultItem) }
+          )
+        }
+      }
+    }
   }
 }
 
@@ -289,7 +355,9 @@ private fun PreviewSearchView() {
   GiantBombTheme {
     TopSearchBar(
       searchBarUiState = SearchBarUiState(recentSearches = listOf("Game 1", "Game 2")),
-      onSearch = {}
+      onSelect = {},
+      onSearch = {},
+      onFastSearch = { FastSearchUiState.Loading }
     )
 
   }
@@ -351,7 +419,8 @@ private fun PreviewLoadingSearchView() {
         searchResultUiState = Loading
       ),
       onSearch = {},
-      onSelect = {}
+      onSelect = {},
+      onFastSearch = { FastSearchUiState.Loading }
     )
   }
 }

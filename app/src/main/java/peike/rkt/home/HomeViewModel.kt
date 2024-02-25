@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import peike.rkt.home.SearchUiState.FastSearchUiState
 import peike.rkt.home.SearchUiState.SearchBarUiState
 import peike.rkt.home.SearchUiState.SearchResultItem
 import peike.rkt.home.SearchUiState.SearchResultUiState
@@ -58,6 +59,27 @@ class HomeViewModel @Inject constructor(
         Log.e("HomeViewModel", "Error: ${e.message}", e)
         _uiState.update { it.copy(searchResultUiState = SearchResultUiState.Error) }
       }
+    }
+  }
+
+  suspend fun fastSearch(query: String): FastSearchUiState {
+    return try {
+      val result = searchRepository.search(query, 3)
+      result.results.map {
+        SearchResultItem(
+          guid = it.guid,
+          name = it.name,
+          imageUrl = it.image.super_url,
+          thumbnailImageUrl = it.image.thumb_url,
+          description = it.deck.orEmpty(),
+          releaseDate = it.original_release_date
+        )
+      }.sortedBy { it.releaseDate }.asReversed().let { items ->
+        FastSearchUiState.Content(items)
+      }
+    } catch (e: Exception) {
+      Log.e("HomeViewModel", "Error: ${e.message}", e)
+      FastSearchUiState.Content(emptyList())
     }
   }
 

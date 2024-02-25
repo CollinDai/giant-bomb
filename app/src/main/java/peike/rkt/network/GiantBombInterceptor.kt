@@ -14,7 +14,6 @@ class GiantBombInterceptor : Interceptor {
     val newUrl = originalRequest.url.newBuilder()
       .addQueryParameter("format", "json")
       .addQueryParameter("api_key", apiKey)
-      .addQueryParameter("limit", "25")
       .addQueryParameter("sort", "original_release_date:desc")
       .setQueryParameter(QUERY_FILTER, "name:$queryValue")
       .build()
