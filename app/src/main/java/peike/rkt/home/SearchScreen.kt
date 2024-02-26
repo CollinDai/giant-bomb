@@ -333,7 +333,7 @@ private fun ErrorResultView(modifier: Modifier = Modifier) {
 
 @Composable
 private fun LoadingView(modifier: Modifier = Modifier) {
-  LinearProgressIndicator(modifier = modifier.fillMaxWidth())
+  LinearProgressIndicator(modifier = modifier.fillMaxWidth().padding(horizontal = 25.dp))
 }
 
 @Composable
